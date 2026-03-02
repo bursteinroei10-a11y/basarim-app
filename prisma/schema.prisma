@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  customer
+  admin
+}
+
+enum OrderStatus {
+  PENDING
+  RECEIVED
+  AWAITING_PAYMENT
+  PAID
+  DELIVERED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  role          UserRole  @default(customer)
+  createdAt     DateTime  @default(now())
+  profile       CustomerProfile?
+  orders        Order[]
+  pushSubscription PushSubscription?
+}
+
+model CustomerProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  phone         String?
+  defaultAddress String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameHe    String
+  sortOrder Int      @default(0)
+  products  MeatProduct[]
+}
+
+model MeatProduct {
+  id                  String   @id @default(cuid())
+  categoryId          String
+  category            Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nameHe              String
+  descriptionHe       String?
+  pricePerKg          Int
+  imageUrl            String?
+  requiresAdvanceOrder Boolean @default(false)
+  isActive            Boolean  @default(true)
+  isBestSeller        Boolean  @default(false)
+  bestSellerOrder     Int?     // 1-4 for display order in best sellers section
+  iconName            String?  // Lucide icon name, e.g. Beef, Drumstick, Flame
+  createdAt           DateTime @default(now())
+  orderItems          OrderItem[]
+}
+
+model FriendRecommendation {
+  id        String   @id @default(cuid())
+  name      String
+  imageUrl  String
+  quote     String   @db.Text
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      OrderStatus @default(PENDING)
+  serviceFee  Int         @default(0) // שירות אריזה משלוח: 12%, min 30 NIS
+  totalAmount Int
+  lockedAt    DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id            String      @id @default(cuid())
+  orderId       String
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  meatProductId String
+  meatProduct   MeatProduct @relation(fields: [meatProductId], references: [id])
+  quantityKg    Float
+  unitPrice     Int
+  lineTotal     Int
+}
+
+model OrderCutoff {
+  id        String   @id @default(cuid())
+  dayOfWeek Int      // 0=Sunday, 1=Monday, ..., 6=Saturday
+  hour      Int      // 0-23
+  minute    Int      // 0-59
+  timezone  String   @default("Asia/Jerusalem")
+  label     String?
+  createdAt DateTime @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model AdminPushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}

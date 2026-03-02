@@ -1,63 +1,84 @@
-import Image from "next/image";
+import { Header } from "@/components/header";
+import { type ProductCardProduct } from "@/components/product-card";
+import { DeadlineBanner } from "@/components/deadline-banner";
+import { HowItWorks } from "@/components/how-it-works";
+import { ShareCta } from "@/components/share-cta";
+import { BestSellers } from "@/components/best-sellers";
+import { CategoryCards } from "@/components/category-cards";
+import { FriendRecommended } from "@/components/friend-recommended";
+import { prisma } from "@/lib/db";
+import { getDemoProducts } from "@/lib/demo-products";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  let products: ProductCardProduct[];
+  let bestSellers: ProductCardProduct[] = [];
+  let friendRecommendations: { id: string; name: string; imageUrl: string; quote: string; sortOrder: number }[] = [];
+
+  try {
+    const [dbProducts, dbBestSellers, dbRecommendations] = await Promise.all([
+      prisma.meatProduct.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        orderBy: [
+          { category: { sortOrder: "asc" } },
+          { nameHe: "asc" },
+        ],
+      }),
+      prisma.meatProduct.findMany({
+        where: { isActive: true, isBestSeller: true },
+        include: { category: true },
+        orderBy: { bestSellerOrder: "asc" },
+      }),
+      prisma.friendRecommendation.findMany({
+        orderBy: { sortOrder: "asc" },
+      }),
+    ]);
+    products = dbProducts;
+    bestSellers = dbBestSellers;
+    friendRecommendations = dbRecommendations;
+  } catch {
+    products = getDemoProducts();
+    // Fallback best sellers when using demo data (same 4 as in seed)
+    const DEMO_BEST_SELLER_ORDER = ["אנטריקוט", "טחון בקר", "שניצל עגל (שייטל)", "המבורגר 170"];
+    const byName = new Map(products.map((p) => [p.nameHe, p]));
+    bestSellers = DEMO_BEST_SELLER_ORDER.map((n) => byName.get(n)).filter(Boolean) as ProductCardProduct[];
+  }
+
+  const byCategory = products.reduce(
+    (acc, p) => {
+      const key = p.category.nameHe;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(p);
+      return acc;
+    },
+    {} as Record<string, ProductCardProduct[]>
+  );
+
+  const categories = Object.entries(byCategory)
+    .map(([nameHe, prods]) => ({
+      slug: (prods[0] as { category?: { slug?: string } })?.category?.slug ?? "",
+      nameHe,
+      products: prods,
+    }))
+    .sort((a, b) => {
+      const orderA = (a.products[0] as { category?: { sortOrder?: number } })?.category?.sortOrder ?? 0;
+      const orderB = (b.products[0] as { category?: { sortOrder?: number } })?.category?.sortOrder ?? 0;
+      return orderA - orderB;
+    });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-stone-100/50">
+      <Header />
+      <DeadlineBanner />
+      <main className="container mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="space-y-16">
+          <HowItWorks />
+          <BestSellers products={bestSellers} />
+          <CategoryCards categories={categories} />
+          <FriendRecommended items={friendRecommendations} />
+          <ShareCta />
         </div>
       </main>
     </div>

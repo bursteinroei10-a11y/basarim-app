@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# בשרים על הדרך — Premium Meat Pre-Order Platform
 
-## Getting Started
+פלטפורמת הזמנת בשר פרימיום. Hebrew RTL, mobile-first, גלאסמורפי.
 
-First, run the development server:
+## התחלה מהירה
+
+### 1. התקנת תלויות
+
+```bash
+npm install
+```
+
+### 2. הגדרת מסד נתונים
+
+צור פרויקט [Supabase](https://supabase.com) והורד את ה-Connection string.
+
+צור קובץ `.env` (או העתק מ-`.env.example`):
+
+```env
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres"
+```
+
+### 3. יצירת טבלאות וזריעה
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+### 4. הפעלת השרת
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+פתח [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## דפים
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| נתיב | תיאור |
+|------|-------|
+| `/` | קטלוג מוצרים |
+| `/checkout` | השלמת הזמנה |
+| `/order-confirmed` | אישור הזמנה |
+| `/admin` | ניהול הזמנות |
+| `/admin/orders/[id]` | פרטי הזמנה + עדכון סטטוס |
+| `/admin/cutoff` | הגדרת סגירת הזמנות (חל cutoff) |
+| `/my-orders` | ההזמנות שלי (לפי אימייל) + הזמן שוב |
 
-## Learn More
+## התחברות למנהל (/admin)
 
-To learn more about Next.js, take a look at the following resources:
+כדי להגן על פאנל הניהול:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. הוסף ל־`.env`:
+   ```env
+   AUTH_SECRET="your-secret"   # הרץ: npx auth secret
+   ADMIN_EMAIL="your@email.com"
+   ADMIN_PASSWORD="your-password"
+   ```
+2. רק המשתמש עם האימייל והסיסמה האלו יוכל לגשת ל־`/admin`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## התראות למנהל (Web Push)
 
-## Deploy on Vercel
+כדי לקבל התראה בדפדפן בכל הזמנה חדשה:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. צור מפתחות VAPID: `npx web-push generate-vapid-keys`
+2. הוסף ל־`.env`: `VAPID_PUBLIC_KEY` ו־`VAPID_PRIVATE_KEY`
+3. הרץ `npm run db:push` (טבלת AdminPushSubscription)
+4. בפאנל הניהול לחץ על "הפעל התראות" ואשר בדפדפן
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## סקריפטים
+
+- `npm run dev` — שרת פיתוח
+- `npm run build` — בניית production
+- `npm run db:generate` — יצירת Prisma Client
+- `npm run db:push` — סנכרון סכמה למסד נתונים
+- `npm run db:seed` — הזנת קטלוג ראשוני
+
+## מבנה
+
+```
+src/
+├── app/
+│   ├── page.tsx         # קטלוג
+│   ├── checkout/        # תשלום
+│   ├── order-confirmed/ # אישור
+│   ├── admin/           # פאנל ניהול
+│   └── api/
+│       ├── products/    # API מוצרים
+│       └── orders/       # API הזמנות
+├── components/
+├── lib/
+└── store/               # Zustand cart
+```
