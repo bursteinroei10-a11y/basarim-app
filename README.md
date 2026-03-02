@@ -14,7 +14,7 @@ npm install
 
 צור פרויקט [Supabase](https://supabase.com) והורד את ה-Connection string.
 
-צור קובץ `.env` (או העתק מ-`.env.example`):
+צור קובץ `.env` (או העתק מ־`.env.example`):
 
 ```env
 DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT].supabase.co:5432/postgres"
