@@ -146,17 +146,17 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth();
-  if (!session?.user) {
+export const DELETE = auth(async (req, context) => {
+  if (!req.auth?.user) {
     return NextResponse.json({ error: "לא מאומת" }, { status: 401 });
   }
 
   try {
-    const { id } = await params;
+    const params = await context.params;
+    const id = params?.id;
+    if (!id) {
+      return NextResponse.json({ error: "חסר מזהה הזמנה" }, { status: 400 });
+    }
 
     await prisma.orderItem.deleteMany({ where: { orderId: id } });
     await prisma.order.delete({ where: { id } });
@@ -169,4 +169,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

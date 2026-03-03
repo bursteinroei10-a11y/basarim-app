@@ -21,7 +21,10 @@ export function AdminOrderDeleteButton({ orderId, variant = "detail" }: AdminOrd
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
       if (res.ok) {
         router.push("/admin");
         router.refresh();
