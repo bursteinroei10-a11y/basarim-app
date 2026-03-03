@@ -62,8 +62,8 @@ async function main() {
     "שקדי עגל": "BeefImage",
     "שיפודי יקיטורי שקדי עגל": "BeefImage",
     "עצמות סירה/מח עצם": "OffalImage",
-    "פרגית": "ChickenImage",
-    "חזה עוף נקי": "ChickenImage",
+    "פרגית": "PargitImage",
+    "חזה עוף נקי": "ChickenBreastImage",
     "פילה עוף נקי": "ChickenImage",
     "שניצל עוף דק": "Schnitzel",
     "רצועות עוף": "ChickenImage",
@@ -71,7 +71,7 @@ async function main() {
     "לבבות עוף": "OffalImage",
     "כבד עוף": "OffalImage",
     "טחון עוף": "ChickenImage",
-    "טחון פרגית": "ChickenImage",
+    "טחון פרגית": "PargitImage",
   };
 
   // Seed products

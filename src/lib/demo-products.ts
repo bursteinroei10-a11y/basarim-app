@@ -18,6 +18,9 @@ const PRODUCT_ICONS: Record<string, string> = {
   "אנטריקוט": "Entrecote",
   "שניצל עגל (שייטל)": "Schnitzel",
   "שניצל עוף דק": "Schnitzel",
+  "פרגית": "PargitImage",
+  "חזה עוף נקי": "ChickenBreastImage",
+  "בריסקט": "GrillImage",
 };
 
 const ICON_BY_CATEGORY: Record<string, string> = {

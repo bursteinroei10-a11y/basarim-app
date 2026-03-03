@@ -18,6 +18,8 @@ import { BeefIcon } from "@/components/beef-icon";
 import { GrillIcon } from "@/components/grill-icon";
 import { LambChopImageIcon } from "@/components/lamb-icon";
 import { ChickenIcon } from "@/components/chicken-icon";
+import { PargitIcon } from "@/components/pargit-icon";
+import { ChickenBreastIcon } from "@/components/chicken-breast-icon";
 import { OffalIcon } from "@/components/offal-icon";
 import { SausageIcon } from "@/components/sausage-icon";
 
@@ -39,6 +41,8 @@ export const PRODUCT_ICON_MAP: Record<string, LucideIcon | React.ComponentType<{
   BeefImage: BeefIcon,
   GrillImage: GrillIcon,
   ChickenImage: ChickenIcon,
+  PargitImage: PargitIcon,
+  ChickenBreastImage: ChickenBreastIcon,
   OffalImage: OffalIcon,
   SausageImage: SausageIcon,
   Entrecote: EntrecoteIcon,
