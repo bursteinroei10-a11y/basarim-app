@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { calculateOrderTotal } from "@/lib/order-fees";
 
@@ -140,6 +141,31 @@ export async function PATCH(
     console.error("Order update error:", error);
     return NextResponse.json(
       { error: "שגיאה בעדכון ההזמנה" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "לא מאומת" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+
+    await prisma.orderItem.deleteMany({ where: { orderId: id } });
+    await prisma.order.delete({ where: { id } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Order delete error:", error);
+    return NextResponse.json(
+      { error: "שגיאה במחיקת ההזמנה" },
       { status: 500 }
     );
   }

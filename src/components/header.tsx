@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CartSheet } from "./cart-sheet";
 
 export function Header() {
@@ -7,9 +8,17 @@ export function Header() {
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="text-xl font-bold tracking-tight text-stone-800 transition-opacity hover:opacity-80"
+          className="flex items-center transition-opacity hover:opacity-90"
+          aria-label="בשרים על הדרך – חזרה לדף הבית"
         >
-          בשרים על הדרך
+          <Image
+            src="/logo.png"
+            alt="בשרים על הדרך"
+            width={140}
+            height={56}
+            className="h-11 w-auto object-contain sm:h-14"
+            priority
+          />
         </Link>
         <nav className="flex items-center gap-3">
           <Link

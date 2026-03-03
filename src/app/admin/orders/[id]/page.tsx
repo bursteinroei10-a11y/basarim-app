@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { OrderStatusForm } from "./order-status-form";
+import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "ממתין",
@@ -50,7 +51,10 @@ export default async function AdminOrderDetailPage({
               })}
             </p>
           </div>
-          <OrderStatusForm orderId={order.id} currentStatus={order.status} />
+          <div className="flex flex-wrap items-center gap-4">
+            <OrderStatusForm orderId={order.id} currentStatus={order.status} />
+            <AdminOrderDeleteButton orderId={order.id} variant="detail" />
+          </div>
         </div>
 
         <div className="mb-6 grid gap-4 sm:grid-cols-2">

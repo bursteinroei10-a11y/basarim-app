@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "ממתין" },
@@ -118,6 +119,7 @@ export function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
             <th className="p-3">פריטים</th>
             <th className="p-3">סטטוס</th>
             <th className="p-3">סכום</th>
+            <th className="p-3 w-16">מחיקה</th>
           </tr>
         </thead>
         <tbody>
@@ -146,6 +148,9 @@ export function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
               </td>
               <td className="p-3 font-medium">
                 ₪{order.totalAmount.toLocaleString()}
+              </td>
+              <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                <AdminOrderDeleteButton orderId={order.id} variant="row" />
               </td>
             </tr>
           ))}

@@ -4,26 +4,30 @@ import catalog from "./seed-catalog.json";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data (in order of dependencies)
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.meatProduct.deleteMany();
-  await prisma.category.deleteMany();
+  // Never delete orders or order items – preserve all customer orders.
+  // Upsert categories and products so re-running seed updates data without wiping orders.
 
-  // Seed categories
+  // Upsert categories (by unique slug)
   for (const cat of catalog.categories) {
-    await prisma.category.create({
-      data: {
+    await prisma.category.upsert({
+      where: { slug: cat.slug },
+      create: {
         slug: cat.slug,
+        nameHe: cat.nameHe,
+        sortOrder: cat.sortOrder,
+      },
+      update: {
         nameHe: cat.nameHe,
         sortOrder: cat.sortOrder,
       },
     });
   }
 
-  // Get category IDs
   const categories = await prisma.category.findMany();
   const categoryMap = Object.fromEntries(categories.map((c) => [c.slug, c.id]));
+  const existingProducts = await prisma.meatProduct.findMany();
+  const productKey = (nameHe: string, categoryId: string) => `${nameHe}::${categoryId}`;
+  const existingByKey = new Map(existingProducts.map((p) => [productKey(p.nameHe, p.categoryId), p]));
 
   const BEST_SELLERS: { nameHe: string; order: number }[] = [
     { nameHe: "אנטריקוט", order: 1 },
@@ -74,24 +78,37 @@ async function main() {
     "טחון פרגית": "PargitImage",
   };
 
-  // Seed products
+  // Upsert products (by nameHe + categoryId) – never delete, so existing orders stay valid
+  const productData = (p: (typeof catalog.products)[0], categoryId: string) => ({
+    categoryId,
+    nameHe: p.nameHe,
+    descriptionHe: p.descriptionHe,
+    pricePerKg: p.pricePerKg,
+    imageUrl: p.imageUrl,
+    requiresAdvanceOrder: p.requiresAdvanceOrder ?? false,
+    isBestSeller: bestSellerSet.has(p.nameHe),
+    bestSellerOrder: bestSellerOrderMap[p.nameHe] ?? null,
+    iconName: PRODUCT_ICONS[p.nameHe] ?? (p.categorySlug === "ground" ? "GroundMeat" : p.categorySlug === "steaks" ? "Beef" : p.categorySlug === "chicken" ? "Drumstick" : "LambChop"),
+  });
+
   for (const p of catalog.products) {
     const categoryId = categoryMap[p.categorySlug];
     if (!categoryId) throw new Error(`Unknown category: ${p.categorySlug}`);
 
-    await prisma.meatProduct.create({
-      data: {
-        categoryId,
-        nameHe: p.nameHe,
-        descriptionHe: p.descriptionHe,
-        pricePerKg: p.pricePerKg,
-        imageUrl: p.imageUrl,
-        requiresAdvanceOrder: p.requiresAdvanceOrder ?? false,
-        isBestSeller: bestSellerSet.has(p.nameHe),
-        bestSellerOrder: bestSellerOrderMap[p.nameHe] ?? null,
-        iconName: PRODUCT_ICONS[p.nameHe] ?? (p.categorySlug === "ground" ? "GroundMeat" : p.categorySlug === "steaks" ? "Beef" : p.categorySlug === "chicken" ? "Drumstick" : "LambChop"),
-      },
-    });
+    const key = productKey(p.nameHe, categoryId);
+    const existing = existingByKey.get(key);
+
+    if (existing) {
+      await prisma.meatProduct.update({
+        where: { id: existing.id },
+        data: productData(p, categoryId),
+      });
+    } else {
+      const created = await prisma.meatProduct.create({
+        data: productData(p, categoryId),
+      });
+      existingByKey.set(key, created);
+    }
   }
 
   // Seed friend recommendations
@@ -134,7 +151,7 @@ async function main() {
     console.log("✅ Created default cutoff: Wednesday 00:00 (Asia/Jerusalem)");
   }
 
-  console.log("✅ Seeded", catalog.categories.length, "categories,", catalog.products.length, "products, and friend recommendations");
+  console.log("✅ Seeded", catalog.categories.length, "categories,", catalog.products.length, "products, and friend recommendations (orders were not modified)");
 }
 
 main()
