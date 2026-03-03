@@ -94,26 +94,26 @@ async function main() {
     });
   }
 
-  // Seed example friend recommendations
+  // Seed friend recommendations
   await prisma.friendRecommendation.deleteMany();
   await prisma.friendRecommendation.createMany({
     data: [
       {
-        name: "דני כהן",
-        imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-        quote: "הבשר הכי טרי וטעים באזור. הזמנתי פעמיים והתעניינתי.",
+        name: "ירדן קטש",
+        imageUrl: "/images/friends/yarden-katesh.png",
+        quote: "איכות פרימיום במחירים נוחים, תענוג לסופ״ש",
         sortOrder: 1,
       },
       {
-        name: "מיכל לוי",
-        imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-        quote: "ממליצה בחום! האיכות מעולה והמשלוח מהיר.",
+        name: "ערן אסייג",
+        imageUrl: "/images/friends/eran-asaig.png",
+        quote: "כייף זמין וטעים",
         sortOrder: 2,
       },
       {
-        name: "יוסי אברהם",
-        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-        quote: "בשר על הדרך הפכו את ההזמנה השבועית לחוויה.",
+        name: "עידו רענן",
+        imageUrl: "/images/friends/ido-raan.png",
+        quote: "המקום הקבוע החדש שלי",
         sortOrder: 3,
       },
     ],
