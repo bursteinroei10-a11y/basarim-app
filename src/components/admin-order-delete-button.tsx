@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { deleteOrder } from "@/app/admin/actions";
 
 interface AdminOrderDeleteButtonProps {
   orderId: string;
@@ -21,16 +22,12 @@ export function AdminOrderDeleteButton({ orderId, variant = "detail" }: AdminOrd
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
-        method: "DELETE",
-        credentials: "same-origin",
-      });
-      if (res.ok) {
+      const result = await deleteOrder(orderId);
+      if (result.ok) {
         router.push("/admin");
         router.refresh();
       } else {
-        const data = await res.json().catch(() => ({}));
-        alert(data.error ?? "שגיאה במחיקה");
+        alert(result.error ?? "שגיאה במחיקה");
       }
     } catch {
       alert("שגיאה במחיקה");
