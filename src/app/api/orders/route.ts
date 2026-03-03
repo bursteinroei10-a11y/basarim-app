@@ -20,6 +20,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate product IDs exist in DB (cart may contain demo IDs if DB failed when loading products)
+    const productIds = [...new Set(items.map((i) => i.productId))];
+    const existingProducts = await prisma.meatProduct.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true },
+    });
+    const existingIds = new Set(existingProducts.map((p) => p.id));
+    const invalidIds = productIds.filter((id) => !existingIds.has(id));
+    if (invalidIds.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "פריטים בסל אינם תקפים (ייתכן שהאתר נטען ללא חיבור למסד נתונים). נא לרוקן את הסל, לרענן את הדף ולהוסיף שוב את הפריטים.",
+        },
+        { status: 400 }
+      );
+    }
+
     const subtotal = items.reduce(
       (sum, i) => sum + i.quantityKg * i.unitPrice,
       0

@@ -157,7 +157,23 @@ export default function CheckoutPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <div className="space-y-2">
+              <p className="text-sm text-destructive">{error}</p>
+              {error.includes("לרוקן את הסל") && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    clearCart();
+                    setError("");
+                    router.push("/");
+                  }}
+                >
+                  רוקן סל וחזור לקטלוג
+                </Button>
+              )}
+            </div>
           )}
 
           <Button
