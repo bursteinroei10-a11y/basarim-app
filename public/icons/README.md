@@ -12,9 +12,9 @@ Custom illustrated icons for meat products. Style: raw product on parchment, cir
 | burger.png | המבורגר 170, מיני המבורגר | ✅ |
 | beef.png | סינטה, פילה בקר, נתח קצבים... | ✅ |
 | grill.png | פיקיניה, פלאנק סטייק, בריסקט | ✅ (beef placeholder) |
-| lamb.png | קבב, ברוסט, אסאדו, שוק... | ✅ (ground-meat placeholder) |
-| chicken.png | פרגית, חזה עוף, פילה עוף... | ✅ (schnitzel placeholder) |
+| lamb.png | קבב, ברוסט, אסאדו, שוק... | ✅ |
+| chicken.png | פרגית, חזה עוף, פילה עוף, שוקיים... | ✅ |
 | offal.png | עצמות סירה, לבבות עוף, כבד עוף | ✅ (ground-meat placeholder) |
-| sausage.png | נקניקיות צוריסו/מרגז/אלבמה | ✅ (ground-meat placeholder) |
+| sausage.png | נקניקיות צוריסו/מרגז/אלבמה | ✅ |
 
 Replace placeholders with custom illustrations when ready. Missing images fall back to Lucide SVG icons.
