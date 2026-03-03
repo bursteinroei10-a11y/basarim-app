@@ -120,12 +120,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Order API error:", error);
     const message = error instanceof Error ? error.message : String(error);
-    const showDebug =
-      process.env.NODE_ENV === "development" || process.env.ORDER_DEBUG === "1";
+    // Always expose error temporarily for debugging; remove after fix
     return NextResponse.json(
       {
         error: "שגיאה ביצירת ההזמנה",
-        debug: showDebug ? message : undefined,
+        debug: message,
       },
       { status: 500 }
     );
