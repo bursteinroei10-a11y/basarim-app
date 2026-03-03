@@ -45,21 +45,24 @@ export async function POST(req: NextRequest) {
     const { serviceFee, total } = calculateOrderTotal(subtotal);
 
     // Create or find user by email (simple guest flow)
+    // Split user+profile create to avoid pgbouncer transaction-mode issues with nested writes
     let user = await prisma.user.findUnique({
       where: { email },
       include: { profile: true },
     });
     if (!user) {
       user = await prisma.user.create({
-        data: {
-          email,
-          role: "customer",
-          profile: {
-            create: { name, phone: phone ?? null },
-          },
-        },
+        data: { email, role: "customer" },
         include: { profile: true },
       });
+      await prisma.customerProfile.create({
+        data: { userId: user.id, name, phone: phone ?? null },
+      });
+      const refreshed = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { profile: true },
+      });
+      if (refreshed) user = refreshed;
     } else {
       await prisma.customerProfile.upsert({
         where: { userId: user.id },
@@ -117,10 +120,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Order API error:", error);
     const message = error instanceof Error ? error.message : String(error);
+    const showDebug =
+      process.env.NODE_ENV === "development" || process.env.ORDER_DEBUG === "1";
     return NextResponse.json(
       {
         error: "שגיאה ביצירת ההזמנה",
-        debug: process.env.NODE_ENV === "development" ? message : undefined,
+        debug: showDebug ? message : undefined,
       },
       { status: 500 }
     );

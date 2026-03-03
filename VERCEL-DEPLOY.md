@@ -53,3 +53,13 @@ Done. Your site is live.
 ---
 
 **Tip:** Update your local `.env` with the same `ADMIN_EMAIL` and `ADMIN_PASSWORD` so you can test admin login locally too.
+
+---
+
+## Troubleshooting: Order creation fails
+
+If orders fail with "שגיאה ביצירת ההזמנה":
+
+1. **See the real error:** Add env var `ORDER_DEBUG` = `1` in Vercel → Settings → Environment Variables, then redeploy. The checkout page will show the actual error message. Remove it after fixing.
+
+2. **Connection pool (Supabase):** For serverless, append `&connection_limit=1` to your `DATABASE_URL` in Vercel (e.g. `...?sslmode=require&pgbouncer=true&connection_limit=1`).
