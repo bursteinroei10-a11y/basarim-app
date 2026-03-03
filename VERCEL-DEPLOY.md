@@ -63,3 +63,19 @@ If orders fail with "שגיאה ביצירת ההזמנה":
 1. **See the real error:** Add env var `ORDER_DEBUG` = `1` in Vercel → Settings → Environment Variables, then redeploy. The checkout page will show the actual error message. Remove it after fixing.
 
 2. **Connection pool (Supabase):** For serverless, append `&connection_limit=1` to your `DATABASE_URL` in Vercel (e.g. `...?sslmode=require&pgbouncer=true&connection_limit=1`).
+
+---
+
+## Troubleshooting: Can't log in to admin / "Server configuration" error
+
+If you see "There is a problem with the server configuration" when logging in at `/admin/login`:
+
+1. **Set all four env vars in Vercel** (Project → Settings → Environment Variables):
+   - `DATABASE_URL` – your Supabase connection string
+   - `AUTH_SECRET` – run `openssl rand -base64 32` and paste the result (required for login)
+   - `ADMIN_EMAIL` – the email you use to log in (e.g. your Gmail)
+   - `ADMIN_PASSWORD` – the password you use to log in
+
+2. **Redeploy** after adding or changing env vars (Deployments → ⋮ → Redeploy).
+
+3. **Use the exact same email and password** as in `ADMIN_EMAIL` and `ADMIN_PASSWORD` (same spelling, no extra spaces).
