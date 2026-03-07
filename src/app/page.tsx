@@ -2,6 +2,7 @@ import { Header } from "@/components/header";
 import { type ProductCardProduct } from "@/components/product-card";
 import { DeadlineBanner } from "@/components/deadline-banner";
 import { HowItWorks } from "@/components/how-it-works";
+import { PhotosPeopleShare } from "@/components/photos-people-share";
 import { ShareCta } from "@/components/share-cta";
 import { BestSellers } from "@/components/best-sellers";
 import { CategoryCards } from "@/components/category-cards";
@@ -75,6 +76,7 @@ export default async function HomePage() {
       <main className="container mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="space-y-16">
           <HowItWorks />
+          <PhotosPeopleShare />
           <BestSellers products={bestSellers} />
           <CategoryCards categories={categories} />
           <FriendRecommended items={friendRecommendations} />
