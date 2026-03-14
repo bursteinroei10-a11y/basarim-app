@@ -1,0 +1,15 @@
+---
+description: When making changes to basarim-app, run git commit and push so the user does not need to do it manually.
+globs: basarim-app/**/*
+alwaysApply: false
+---
+
+# Deployment Workflow
+
+When you complete code changes to the basarim-app project:
+
+1. Run `git add -A`, `git commit -m "<descriptive message>"`, and `git push` from the basarim-app directory.
+2. Request `git_write` and `network` permissions if the sandbox blocks these commands.
+3. Do this automatically—do not ask the user to run these commands themselves.
+
+Exception: Skip if the user explicitly says they will deploy manually or prefers not to push.
