@@ -28,12 +28,17 @@ export async function GET() {
     const totalPaid = orders.reduce((s, o) => s + o.totalAmount, 0);
     const totalEarned = orders.reduce((s, o) => s + o.serviceFee, 0);
 
-    // Group by batch (cutoff date)
+    // Group by batch (cutoff date). Defensive: if date-fns-tz fails in serverless, use simple date grouping
     const batchMap = new Map<string, { cutoffAt: Date; orders: typeof orders; totalPaid: number; totalEarned: number }>();
     for (const order of orders) {
-      const cutoffAt = cutoffRule
-        ? getOrderBatchCutoffAt(cutoffRule, order.createdAt)
-        : order.createdAt;
+      let cutoffAt: Date;
+      try {
+        cutoffAt = cutoffRule
+          ? getOrderBatchCutoffAt(cutoffRule, order.createdAt)
+          : order.createdAt;
+      } catch {
+        cutoffAt = order.createdAt;
+      }
       const key = cutoffAt.toISOString();
       const existing = batchMap.get(key);
       if (existing) {

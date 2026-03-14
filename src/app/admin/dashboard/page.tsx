@@ -1,76 +1,81 @@
-import { prisma } from "@/lib/db";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getOrderBatchCutoffAt } from "@/lib/cutoff";
 
-export const dynamic = "force-dynamic";
+interface Batch {
+  cutoffAt: string;
+  label: string;
+  orderCount: number;
+  totalPaid: number;
+  totalEarned: number;
+}
 
-export default async function AdminDashboardPage() {
-  const deliveredOrders = await prisma.order.findMany({
-    where: { status: "DELIVERED" },
-    include: {
-      user: { include: { profile: true } },
-      items: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+interface RepeatBuyer {
+  userId: string;
+  email: string;
+  name: string | null;
+  orderCount: number;
+}
 
-  const rule = await prisma.orderCutoff.findFirst({
-    orderBy: { createdAt: "desc" },
-  });
+interface DashboardData {
+  totalPaid: number;
+  totalEarned: number;
+  orderCount: number;
+  byBatch: Batch[];
+  repeatBuyers: RepeatBuyer[];
+}
 
-  // Totals (DELIVERED only)
-  const totalPaid = deliveredOrders.reduce((s, o) => s + o.totalAmount, 0);
-  const totalEarned = deliveredOrders.reduce((s, o) => s + o.serviceFee, 0);
+export default function AdminDashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // By batch
-  const batchMap = new Map<string, { cutoffAt: Date; orders: typeof deliveredOrders; total: number; fee: number }>();
-  if (rule) {
-    for (const order of deliveredOrders) {
-      const cutoffAt = getOrderBatchCutoffAt(
-        {
-          dayOfWeek: rule.dayOfWeek,
-          hour: rule.hour,
-          minute: rule.minute,
-          timezone: rule.timezone,
-        },
-        order.createdAt
-      );
-      const key = cutoffAt.toISOString();
-      const existing = batchMap.get(key);
-      if (existing) {
-        existing.orders.push(order);
-        existing.total += order.totalAmount;
-        existing.fee += order.serviceFee;
-      } else {
-        batchMap.set(key, {
-          cutoffAt,
-          orders: [order],
-          total: order.totalAmount,
-          fee: order.serviceFee,
-        });
-      }
-    }
+  useEffect(() => {
+    fetch("/admin/api/dashboard")
+      .then((res) => {
+        if (!res.ok) throw new Error("שגיאה בטעינה");
+        return res.json();
+      })
+      .then((json) => {
+        if (json.error) throw new Error(json.error);
+        setData(json);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "שגיאה"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-semibold">לוח בקרה</h1>
+        <p className="text-muted-foreground">טוען...</p>
+      </div>
+    );
   }
-  const batches = Array.from(batchMap.values()).sort(
-    (a, b) => b.cutoffAt.getTime() - a.cutoffAt.getTime()
-  );
 
-  // Repeat buyers (2+ DELIVERED orders ever)
-  const userIdCount = new Map<string, number>();
-  for (const o of deliveredOrders) {
-    userIdCount.set(o.userId, (userIdCount.get(o.userId) ?? 0) + 1);
+  if (error) {
+    return (
+      <div className="space-y-6 rounded-2xl border border-amber-200 bg-amber-50/50 p-8">
+        <h2 className="text-xl font-semibold text-amber-900">שגיאה בטעינת לוח הבקרה</h2>
+        <p className="text-sm text-amber-800">{error}</p>
+        <Link
+          href="/admin"
+          className="inline-block rounded-lg border border-amber-600 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100"
+        >
+          חזרה להזמנות
+        </Link>
+      </div>
+    );
   }
-  const repeatBuyers = deliveredOrders.filter((o) => (userIdCount.get(o.userId) ?? 0) >= 2);
-  const uniqueRepeatBuyers = new Map<string, (typeof deliveredOrders)[0]["user"]>();
-  for (const o of repeatBuyers) {
-    uniqueRepeatBuyers.set(o.userId, o.user);
-  }
+
+  if (!data) return null;
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold">לוח בקרה</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="mt-1 text-sm text-muted-foreground">
           נתונים לפי הזמנות שנמסרו בלבד
         </p>
       </div>
@@ -78,33 +83,28 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h3 className="text-sm font-medium text-muted-foreground">סה״כ שנגבה</h3>
-          <p className="mt-2 text-3xl font-bold">₪{totalPaid.toLocaleString()}</p>
-          <p className="mt-1 text-sm text-stone-500">{deliveredOrders.length} הזמנות</p>
+          <p className="mt-2 text-3xl font-bold">₪{data.totalPaid.toLocaleString()}</p>
+          <p className="mt-1 text-sm text-stone-500">{data.orderCount} הזמנות</p>
         </div>
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h3 className="text-sm font-medium text-muted-foreground">הרווח שלך (12% / ₪30)</h3>
-          <p className="mt-2 text-3xl font-bold text-green-700">₪{totalEarned.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-bold text-green-700">₪{data.totalEarned.toLocaleString()}</p>
         </div>
       </div>
 
-      {batches.length > 0 && (
+      {data.byBatch.length > 0 && (
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h3 className="mb-4 font-semibold">לפי משלוח (תאריך סגירה)</h3>
           <div className="space-y-3">
-            {batches.map((b) => (
+            {data.byBatch.map((b) => (
               <div
-                key={b.cutoffAt.toISOString()}
+                key={b.cutoffAt}
                 className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4"
               >
                 <div>
-                  <p className="font-medium">
-                    {b.cutoffAt.toLocaleDateString("he-IL", {
-                      dateStyle: "long",
-                      timeStyle: "short",
-                    })}
-                  </p>
+                  <p className="font-medium">{b.label}</p>
                   <p className="text-sm text-muted-foreground">
-                    {b.orders.length} הזמנות • סה״כ ₪{b.total.toLocaleString()} • רווח ₪{b.fee.toLocaleString()}
+                    {b.orderCount} הזמנות • סה״כ ₪{b.totalPaid.toLocaleString()} • רווח ₪{b.totalEarned.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -115,19 +115,19 @@ export default async function AdminDashboardPage() {
 
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
         <h3 className="mb-4 font-semibold">לקוחות חוזרים (2+ הזמנות)</h3>
-        {uniqueRepeatBuyers.size === 0 ? (
+        {data.repeatBuyers.length === 0 ? (
           <p className="text-muted-foreground">אין לקוחות חוזרים עדיין</p>
         ) : (
           <ul className="space-y-2">
-            {Array.from(uniqueRepeatBuyers.entries()).map(([userId, user]) => {
-              const count = userIdCount.get(userId) ?? 0;
-              return (
-                <li key={userId} className="flex items-center justify-between rounded-lg border px-4 py-2">
-                  <span className="font-medium">{user.profile?.name ?? user.email}</span>
-                  <span className="text-sm text-muted-foreground">{count} הזמנות</span>
-                </li>
-              );
-            })}
+            {data.repeatBuyers.map((r) => (
+              <li
+                key={r.userId}
+                className="flex items-center justify-between rounded-lg border px-4 py-2"
+              >
+                <span className="font-medium">{r.name ?? r.email}</span>
+                <span className="text-sm text-muted-foreground">{r.orderCount} הזמנות</span>
+              </li>
+            ))}
           </ul>
         )}
       </div>
