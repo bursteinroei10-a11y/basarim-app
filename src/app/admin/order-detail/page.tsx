@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import Link from "next/link";
-import { AdminOrderDetailClient } from "@/app/admin/orders/[id]/admin-order-detail-client";
+import { AdminOrderDetailClient } from "@/components/admin-order-detail-client";
 
 /**
  * Order detail at /admin/order-detail?id=xxx

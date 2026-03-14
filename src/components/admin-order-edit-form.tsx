@@ -19,21 +19,21 @@ interface Product {
   id: string;
   nameHe: string;
   pricePerKg: number;
-  category: { nameHe: string };
+  category?: { nameHe: string };
 }
 
 interface AdminOrderEditFormProps {
   orderId: string;
   initialItems: { meatProduct: { id: string; nameHe: string; pricePerKg: number }; quantityKg: number }[];
   canEdit: boolean; // false when status is DELIVERED
-  products: Product[];
+  products?: Product[];
 }
 
 export function AdminOrderEditForm({
   orderId,
   initialItems,
   canEdit,
-  products,
+  products = [],
 }: AdminOrderEditFormProps) {
   const router = useRouter();
   const [items, setItems] = useState<EditItem[]>(() =>

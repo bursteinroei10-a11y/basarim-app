@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatusForm } from "./order-status-form";
+import { OrderStatusForm } from "@/components/order-status-form";
 import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
 import { AdminOrderEditForm } from "@/components/admin-order-edit-form";
 
@@ -17,16 +17,16 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 type OrderData = {
-  order: {
+  order?: {
     id: string;
     status: string;
     totalAmount: number;
     createdAt: string;
-    lastEditedBy: string | null;
-    lastEditedAt: string | null;
+    lastEditedBy?: string | null;
+    lastEditedAt?: string | null;
     user: {
       email: string;
-      profile: { name: string; phone: string | null } | null;
+      profile?: { name?: string; phone?: string | null } | null;
     };
     items: {
       id: string;
@@ -36,19 +36,15 @@ type OrderData = {
       meatProduct: { id: string; nameHe: string; pricePerKg: number };
     }[];
   };
-  products: {
-    id: string;
-    nameHe: string;
-    pricePerKg: number;
-    category: { nameHe: string };
-  }[];
+  products?: { id: string; nameHe: string; pricePerKg: number; category?: { nameHe: string } }[];
+  error?: string;
 };
 
 interface AdminOrderDetailClientProps {
-  orderId?: string; // When provided (e.g. from /admin/order-detail?id=), use this instead of params
+  orderId?: string;
 }
 
-export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) {
+export function AdminOrderDetailClient(props?: AdminOrderDetailClientProps) {
   const orderIdProp = props?.orderId;
   const params = useParams();
   const id = orderIdProp ?? (params?.id as string);
@@ -58,13 +54,17 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     fetch(`/admin/api/orders/${id}`)
-      .then((r) => r.json())
-      .then((json) => {
+      .then((r) => r.json().then((json) => ({ ok: r.ok, json })))
+      .then(({ ok, json }) => {
+        if (!ok) throw new Error(json?.error ?? "הזמנה לא נמצאה");
         if (json?.error) throw new Error(json.error);
         if (!json?.order) throw new Error("הזמנה לא נמצאה");
-        setData({ order: json.order, products: json.products ?? [] });
+        setData(json);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "שגיאה"))
       .finally(() => setLoading(false));
@@ -78,11 +78,11 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
     );
   }
 
-  if (error || !data) {
+  if (error || !data?.order) {
     return (
       <div className="space-y-4 rounded-2xl border border-amber-200 bg-amber-50/50 p-8">
         <h2 className="text-xl font-semibold text-amber-900">שגיאה בטעינת ההזמנה</h2>
-        <p className="text-sm text-amber-800">{error ?? "הזמנה לא נמצאה"}</p>
+        <p className="text-sm text-amber-800">{error ?? data?.error ?? "הזמנה לא נמצאה"}</p>
         <div className="flex gap-4">
           <button
             onClick={() => window.location.reload()}
@@ -101,7 +101,8 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
     );
   }
 
-  const { order, products } = data;
+  const order = data.order;
+  const products = data.products ?? [];
 
   return (
     <div className="space-y-6">
@@ -131,9 +132,9 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
         <div className="mb-6 grid gap-4 sm:grid-cols-2">
           <div>
             <h3 className="mb-2 text-sm font-medium text-muted-foreground">לקוח</h3>
-            <p className="font-medium">{order.user.profile?.name ?? "—"}</p>
-            <p className="text-sm">{order.user.email}</p>
-            {order.user.profile?.phone && (
+            <p className="font-medium">{order.user?.profile?.name ?? "—"}</p>
+            <p className="text-sm">{order.user?.email ?? "—"}</p>
+            {order.user?.profile?.phone && (
               <p className="text-sm">{order.user.profile.phone}</p>
             )}
           </div>
@@ -156,17 +157,17 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
             </tr>
           </thead>
           <tbody>
-            {order.items.map((item) => (
+            {(order.items ?? []).map((item) => (
               <tr key={item.id} className="border-b">
-                <td className="py-3">{item.meatProduct.nameHe}</td>
+                <td className="py-3">{item.meatProduct?.nameHe ?? "—"}</td>
                 <td className="py-3">{item.quantityKg} ק״ג</td>
                 <td className="py-3">₪{item.unitPrice}</td>
-                <td className="py-3">₪{item.lineTotal.toLocaleString()}</td>
+                <td className="py-3">₪{item.lineTotal?.toLocaleString() ?? "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <p className="mt-4 text-lg font-bold">סה״כ: ₪{order.totalAmount.toLocaleString()}</p>
+        <p className="mt-4 text-lg font-bold">סה״כ: ₪{order.totalAmount?.toLocaleString() ?? "0"}</p>
 
         {order.lastEditedAt && (
           <p className="mt-3 text-sm text-muted-foreground">
@@ -180,10 +181,9 @@ export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) 
 
         <AdminOrderEditForm
           orderId={order.id}
-          initialItems={order.items.map((i) => ({
-            meatProduct: i.meatProduct,
-            quantityKg: i.quantityKg,
-          }))}
+          initialItems={(order.items ?? [])
+            .filter((i): i is typeof i & { meatProduct: NonNullable<typeof i.meatProduct> } => !!i?.meatProduct)
+            .map((i) => ({ meatProduct: i.meatProduct, quantityKg: i.quantityKg }))}
           canEdit={order.status !== "DELIVERED"}
           products={products}
         />
