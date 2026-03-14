@@ -2,13 +2,17 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
-import Link from "next/link";
-import { AdminOrderDetailClient } from "@/components/admin-order-detail-client";
+import dynamic from "next/dynamic";
+
+const AdminOrderDetailClient = dynamic(
+  () => import("@/components/admin-order-detail-client").then((m) => ({ default: m.AdminOrderDetailClient })),
+  { ssr: false, loading: () => <div className="py-12 text-center text-muted-foreground">טוען...</div> }
+);
 
 /**
  * Order detail at /admin/order-detail?id=xxx
- * Uses query param instead of dynamic segment to avoid Vercel server-side errors
- * with /admin/orders/[id].
+ * Uses query param instead of dynamic segment to avoid Vercel server-side errors.
+ * Dynamic import with ssr:false avoids hydration/client-side loading issues.
  */
 function OrderDetailContent() {
   const searchParams = useSearchParams();

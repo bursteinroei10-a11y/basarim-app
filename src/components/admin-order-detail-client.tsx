@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusForm } from "@/components/order-status-form";
@@ -45,9 +44,7 @@ interface AdminOrderDetailClientProps {
 }
 
 export function AdminOrderDetailClient(props?: AdminOrderDetailClientProps) {
-  const orderIdProp = props?.orderId;
-  const params = useParams();
-  const id = orderIdProp ?? (params?.id as string);
+  const id = props?.orderId;
 
   const [data, setData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
