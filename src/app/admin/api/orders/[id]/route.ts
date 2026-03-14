@@ -6,6 +6,46 @@ import { calculateOrderTotal } from "@/lib/order-fees";
 const VALID_STATUSES: OrderStatus[] = ["PENDING", "RECEIVED", "AWAITING_PAYMENT", "PAID", "DELIVERED"];
 
 /**
+ * GET /admin/api/orders/[id]
+ * Returns order with user, items, products for admin detail/edit page.
+ */
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "חסר מזהה הזמנה" }, { status: 400 });
+  }
+
+  try {
+    const [order, products] = await Promise.all([
+      prisma.order.findUnique({
+        where: { id },
+        include: {
+          user: { include: { profile: true } },
+          items: { include: { meatProduct: true } },
+        },
+      }),
+      prisma.meatProduct.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        orderBy: [{ category: { sortOrder: "asc" } }, { nameHe: "asc" }],
+      }),
+    ]);
+
+    if (!order) {
+      return NextResponse.json({ error: "הזמנה לא נמצאה" }, { status: 404 });
+    }
+
+    return NextResponse.json({ order, products });
+  } catch (error) {
+    console.error("Admin order GET error:", error);
+    return NextResponse.json({ error: "שגיאה" }, { status: 500 });
+  }
+}
+
+/**
  * PATCH /admin/api/orders/[id]
  * Auth: middleware. Updates status or items.
  */
