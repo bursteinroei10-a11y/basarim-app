@@ -2,12 +2,20 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
-  const isAdmin = req.nextUrl.pathname.startsWith("/admin");
-  const isLogin = req.nextUrl.pathname === "/admin/login";
-  const isAdminApi = req.nextUrl.pathname.startsWith("/admin/api/");
+  const path = req.nextUrl.pathname;
+  const isAdmin = path.startsWith("/admin");
+  const isLogin = path === "/admin/login";
+  const isAdminApi = path.startsWith("/admin/api/");
+
+  // Redirect /admin/orders/[id] to /admin/order-detail?id= - avoids Vercel server-side error
+  const ordersMatch = path.match(/^\/admin\/orders\/([^/]+)$/);
+  if (ordersMatch) {
+    return NextResponse.redirect(
+      new URL(`/admin/order-detail?id=${ordersMatch[1]}`, req.nextUrl.origin)
+    );
+  }
 
   if (isAdmin && !isLogin && !req.auth) {
-    // For API routes, return 401 so fetch() gets JSON (not redirect)
     if (isAdminApi) {
       return NextResponse.json({ error: "לא מאומת" }, { status: 401 });
     }

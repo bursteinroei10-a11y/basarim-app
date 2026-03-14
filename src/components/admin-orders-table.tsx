@@ -94,7 +94,7 @@ export function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
   const router = useRouter();
 
   const handleRowClick = (orderId: string) => {
-    router.push(`/admin/orders/${orderId}`);
+    router.push(`/admin/order-detail?id=${orderId}`);
   };
 
   const handleStatusUpdated = () => {

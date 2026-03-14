@@ -1,12 +1,14 @@
-import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 
-const AdminOrderDetailClient = dynamic(
-  () => import("./admin-order-detail-client").then((m) => m.AdminOrderDetailClient),
-  { ssr: false, loading: () => <div className="py-12 text-center text-muted-foreground">טוען...</div> }
-);
-
-export const dynamic = "force-dynamic";
-
-export default function AdminOrderDetailPage() {
-  return <AdminOrderDetailClient />;
+/**
+ * Redirect /admin/orders/[id] to /admin/order-detail?id=xxx
+ * The dynamic [id] route causes server-side errors on Vercel.
+ */
+export default async function AdminOrderRedirect({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  redirect(`/admin/order-detail?id=${id}`);
 }

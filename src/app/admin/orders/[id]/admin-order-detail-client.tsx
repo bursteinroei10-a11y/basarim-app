@@ -44,10 +44,14 @@ type OrderData = {
   }[];
 };
 
-export function AdminOrderDetailClient() {
-  const router = useRouter();
+interface AdminOrderDetailClientProps {
+  orderId?: string; // When provided (e.g. from /admin/order-detail?id=), use this instead of params
+}
+
+export function AdminOrderDetailClient(props: AdminOrderDetailClientProps = {}) {
+  const orderIdProp = props?.orderId;
   const params = useParams();
-  const id = params?.id as string;
+  const id = orderIdProp ?? (params?.id as string);
 
   const [data, setData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
