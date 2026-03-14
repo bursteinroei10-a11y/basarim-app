@@ -68,8 +68,11 @@ export function AdminOrderDetailView({ order, products }: AdminOrderDetailViewPr
             <h1 className="text-2xl font-bold">הזמנה #{order.id.slice(-6)}</h1>
             <p className="text-sm text-muted-foreground">
               {new Date(createdAt).toLocaleDateString("he-IL", {
-                dateStyle: "long",
-                timeStyle: "short",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
               })}
             </p>
           </div>
@@ -123,8 +126,11 @@ export function AdminOrderDetailView({ order, products }: AdminOrderDetailViewPr
           <p className="mt-3 text-sm text-muted-foreground">
             עדכון אחרון: {order.lastEditedBy === "admin" ? "מנהל" : "לקוח"} •{" "}
             {new Date(lastEditedAt).toLocaleDateString("he-IL", {
-              dateStyle: "medium",
-              timeStyle: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </p>
         )}
