@@ -18,6 +18,9 @@ export default function AdminLayout({
             <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground">
               הזמנות
             </Link>
+            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+              לוח בקרה
+            </Link>
             <Link href="/admin/cutoff" className="text-sm text-muted-foreground hover:text-foreground">
               סגירת הזמנות
             </Link>

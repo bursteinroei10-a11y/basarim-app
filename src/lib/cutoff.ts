@@ -51,3 +51,11 @@ export function isPastCutoff(cutoffAt: Date, now?: Date): boolean {
   const n = now ?? new Date();
   return n >= cutoffAt;
 }
+
+/**
+ * Get the cutoff datetime for the batch an order belongs to.
+ * Used to group orders by "big order" (weekly delivery batch).
+ */
+export function getOrderBatchCutoffAt(rule: CutoffRule, orderCreatedAt: Date): Date {
+  return getNextCutoff(rule, orderCreatedAt);
+}

@@ -112,7 +112,14 @@ export async function PATCH(
         }),
         prisma.order.update({
           where: { id },
-          data: { serviceFee, totalAmount: total, status: "PENDING" },
+          data: {
+            serviceFee,
+            totalAmount: total,
+            status: "PENDING",
+            lastEditedBy: "customer",
+            lastEditedAt: new Date(),
+            lastEditedByUserId: order.userId,
+          },
         }),
       ]);
 
@@ -123,20 +130,11 @@ export async function PATCH(
       return NextResponse.json(updated);
     }
 
-    // Admin status update flow
-    if (!status || !VALID_STATUSES.includes(status)) {
-      return NextResponse.json(
-        { error: "סטטוס לא תקין" },
-        { status: 400 }
-      );
-    }
-
-    const order = await prisma.order.update({
-      where: { id },
-      data: { status: status as "PENDING" | "RECEIVED" | "AWAITING_PAYMENT" | "PAID" | "DELIVERED" },
-    });
-
-    return NextResponse.json(order);
+    // Admin operations moved to /admin/api/orders/[id]
+    return NextResponse.json(
+      { error: "סטטוס ניתן לעדכון רק מהממשק הניהולי" },
+      { status: 400 }
+    );
   } catch (error) {
     console.error("Order update error:", error);
     return NextResponse.json(

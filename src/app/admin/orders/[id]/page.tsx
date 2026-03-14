@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { OrderStatusForm } from "./order-status-form";
 import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
+import { AdminOrderEditForm } from "@/components/admin-order-edit-form";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "ממתין",
@@ -22,13 +23,20 @@ export default async function AdminOrderDetailPage({
 }) {
   const { id } = await params;
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      user: { include: { profile: true } },
-      items: { include: { meatProduct: true } },
-    },
-  });
+  const [order, products] = await Promise.all([
+    prisma.order.findUnique({
+      where: { id },
+      include: {
+        user: { include: { profile: true } },
+        items: { include: { meatProduct: true } },
+      },
+    }),
+    prisma.meatProduct.findMany({
+      where: { isActive: true },
+      include: { category: true },
+      orderBy: [{ category: { sortOrder: "asc" } }, { nameHe: "asc" }],
+    }),
+  ]);
 
   if (!order) notFound();
 
@@ -96,6 +104,23 @@ export default async function AdminOrderDetailPage({
           </tbody>
         </table>
         <p className="mt-4 text-lg font-bold">סה״כ: ₪{order.totalAmount.toLocaleString()}</p>
+
+        {order.lastEditedAt && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            עדכון אחרון: {order.lastEditedBy === "admin" ? "מנהל" : "לקוח"} •{" "}
+            {new Date(order.lastEditedAt).toLocaleDateString("he-IL", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </p>
+        )}
+
+        <AdminOrderEditForm
+          orderId={order.id}
+          initialItems={order.items}
+          canEdit={order.status !== "DELIVERED"}
+          products={products}
+        />
       </div>
     </div>
   );

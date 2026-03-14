@@ -31,6 +31,8 @@ interface Order {
   totalAmount: number;
   createdAt: string;
   items: OrderItem[];
+  lastEditedBy?: string;
+  lastEditedAt?: string;
 }
 
 function MyOrdersContent() {
@@ -167,6 +169,15 @@ function MyOrdersContent() {
                       )}
                     </ul>
                     <p className="mb-4 font-bold">₪{order.totalAmount.toLocaleString()}</p>
+                    {order.lastEditedAt && (
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        עדכון אחרון: {order.lastEditedBy === "admin" ? "מנהל" : "לקוח"} •{" "}
+                        {new Date(order.lastEditedAt).toLocaleDateString("he-IL", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2">
                       {!locked && (
                         <Button variant="default" size="sm" asChild>

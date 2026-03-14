@@ -37,6 +37,7 @@ export default function EditOrderPage() {
   const [items, setItems] = useState<EditItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [editable, setEditable] = useState(true);
+  const [lastEdited, setLastEdited] = useState<{ by: string; at: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -68,6 +69,12 @@ export default function EditOrderPage() {
       );
       setEditable(orderRes.editable ?? false);
       setProducts(Array.isArray(productsRes) ? productsRes : []);
+      if (orderRes.lastEditedBy && orderRes.lastEditedAt) {
+        setLastEdited({
+          by: orderRes.lastEditedBy === "admin" ? "מנהל" : "את/ה",
+          at: orderRes.lastEditedAt,
+        });
+      }
       setLoading(false);
     });
   }, [orderId, email, router]);
@@ -173,6 +180,16 @@ export default function EditOrderPage() {
         <h1 className="mb-8 text-3xl font-bold tracking-tight text-stone-800">
           עריכת הזמנה
         </h1>
+
+        {lastEdited && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            עדכון אחרון: {lastEdited.by} •{" "}
+            {new Date(lastEdited.at).toLocaleDateString("he-IL", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </p>
+        )}
 
         {!editable ? (
           <div className="rounded-xl bg-amber-50 p-6 text-center text-amber-800">

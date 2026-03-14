@@ -77,16 +77,19 @@ model FriendRecommendation {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status      OrderStatus @default(PENDING)
-  serviceFee  Int         @default(0) // שירות אריזה משלוח: 12%, min 30 NIS
-  totalAmount Int
-  lockedAt    DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  items       OrderItem[]
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status            OrderStatus @default(PENDING)
+  serviceFee        Int         @default(0) // שירות אריזה משלוח: 12%, min 30 NIS
+  totalAmount       Int
+  lockedAt          DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  items             OrderItem[]
+  lastEditedBy      String?     // "admin" | "customer"
+  lastEditedAt      DateTime?
+  lastEditedByUserId String?
 }
 
 model OrderItem {
