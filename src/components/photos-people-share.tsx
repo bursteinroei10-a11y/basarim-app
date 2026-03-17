@@ -5,6 +5,11 @@ const PHOTOS = [
   { src: "/images/photos-shared/photo2.png", alt: "הכנת ארוחה – בשר עם תפוחי אדמה ועגבניות" },
   { src: "/images/photos-shared/photo3.png", alt: "סטייקים אנטריקוט באריזה ואקום" },
   { src: "/images/photos-shared/photo4.png", alt: "חתיכת בשר על קרש חיתוך" },
+  { src: "/images/photos-shared/photo5.png", alt: "בשר בקר, שוק טלה ונקניקיות באריזה ואקום" },
+  { src: "/images/photos-shared/photo6.png", alt: "סטייקים צלויים על קרש חיתוך" },
+  { src: "/images/photos-shared/photo7.png", alt: "צלעות טלה באריזה ואקום" },
+  { src: "/images/photos-shared/photo8.png", alt: "נקניקיות כשרות מטובלות" },
+  { src: "/images/photos-shared/photo9.png", alt: "בשר על הגריל" },
 ];
 
 export function PhotosPeopleShare() {
