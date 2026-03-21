@@ -79,3 +79,22 @@ If you see "There is a problem with the server configuration" when logging in at
 2. **Redeploy** after adding or changing env vars (Deployments → ⋮ → Redeploy).
 
 3. **Use the exact same email and password** as in `ADMIN_EMAIL` and `ADMIN_PASSWORD` (same spelling, no extra spaces).
+
+---
+
+## Push Notifications (new order alerts on your phone)
+
+To get a push notification on your phone whenever a new order comes in:
+
+1. **Add two env vars in Vercel** (Project → Settings → Environment Variables):
+   - `VAPID_PUBLIC_KEY` – copy from your `.env` (or run `npx web-push generate-vapid-keys` to create new ones)
+   - `VAPID_PRIVATE_KEY` – copy from your `.env`
+
+2. **Redeploy** (Deployments → ⋮ → Redeploy).
+
+3. **Enable on your phone:**
+   - Open **https://basarimapp.vercel.app/admin** in Chrome on your phone
+   - Log in
+   - Tap **"הפעל התראות"** (Enable notifications) and allow when the browser asks
+
+You’ll get a push for every new order (customer name, total, item count).
