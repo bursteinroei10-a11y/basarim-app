@@ -53,20 +53,24 @@ export function AdminEnablePush() {
     }
   };
 
-  if (!supported) return null;
-
   return (
     <div className="rounded-xl border bg-white p-4">
       <p className="mb-2 text-sm font-medium">התראות על הזמנות חדשות</p>
-      <p className="mb-3 text-xs text-muted-foreground">
-        קבלו התראה בדפדפן בכל הזמנה חדשה.
-      </p>
       {enabled ? (
         <p className="text-sm text-green-600">התראות מופעלות</p>
+      ) : supported ? (
+        <>
+          <p className="mb-3 text-xs text-muted-foreground">
+            קבלו התראה בדפדפן בכל הזמנה חדשה.
+          </p>
+          <Button size="sm" onClick={handleEnable} disabled={loading}>
+            {loading ? "מפעיל..." : "הפעל התראות"}
+          </Button>
+        </>
       ) : (
-        <Button size="sm" onClick={handleEnable} disabled={loading}>
-          {loading ? "מפעיל..." : "הפעל התראות"}
-        </Button>
+        <p className="text-xs text-amber-700">
+          באייפון: הוסיפו את האתר למסך הבית (Share → Add to Home Screen) ופתחו משם. באנדרואיד: השתמשו ב-Chrome.
+        </p>
       )}
     </div>
   );
