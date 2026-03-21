@@ -7,6 +7,7 @@ export function AdminEnablePush() {
   const [supported, setSupported] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setSupported(
@@ -19,22 +20,27 @@ export function AdminEnablePush() {
   const handleEnable = async () => {
     if (!supported) return;
     setLoading(true);
+    setError(null);
     try {
       const reg = await navigator.serviceWorker.register("/sw.js");
       await (reg as unknown as { ready: Promise<ServiceWorkerRegistration> }).ready;
-      const res = await fetch("/api/admin/vapid-public");
-      const { publicKey } = await res.json();
-      if (!publicKey) {
-        setLoading(false);
+
+      const vapidRes = await fetch("/api/admin/vapid-public");
+      const vapidData = await vapidRes.json();
+      if (!vapidRes.ok || !vapidData.publicKey) {
+        setError("מפתחות VAPID לא הוגדרו. הוסף VAPID_PUBLIC_KEY ו-VAPID_PRIVATE_KEY ב-Vercel.");
         return;
       }
+      const publicKey = vapidData.publicKey;
+
       const base64 = publicKey.replace(/-/g, "+").replace(/_/g, "/");
       const keyBuf = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: keyBuf,
       });
-      await fetch("/api/admin/push-subscription", {
+
+      const saveRes = await fetch("/api/admin/push-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -45,9 +51,19 @@ export function AdminEnablePush() {
           },
         }),
       });
+
+      if (!saveRes.ok) {
+        const errData = await saveRes.json().catch(() => ({}));
+        setError(errData?.error ?? "שגיאה בשמירת ההרשאה. נסו שוב.");
+        return;
+      }
       setEnabled(true);
     } catch (err) {
       console.error(err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg.includes("Permission") || msg.includes("denied")
+        ? "התראות בוטלו. נסו שוב ואשרו כשהדפדפן מבקש."
+        : "שגיאה. וודא ש־VAPID מוגדרים ב-Vercel ועשו Redeploy.");
     } finally {
       setLoading(false);
     }
@@ -63,6 +79,9 @@ export function AdminEnablePush() {
           <p className="mb-3 text-xs text-muted-foreground">
             קבלו התראה בדפדפן בכל הזמנה חדשה.
           </p>
+          {error && (
+            <p className="mb-2 text-xs text-red-600">{error}</p>
+          )}
           <Button size="sm" onClick={handleEnable} disabled={loading}>
             {loading ? "מפעיל..." : "הפעל התראות"}
           </Button>
