@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { OrderStatusForm } from "@/components/order-status-form";
 import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
 import { AdminOrderEditForm } from "@/components/admin-order-edit-form";
+import { MapPin } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "ממתין",
@@ -19,6 +20,7 @@ export type OrderForView = {
   status: string;
   totalAmount: number;
   createdAt: Date | string;
+  pickupLocation?: string | null;
   lastEditedBy?: string | null;
   lastEditedAt?: Date | string | null;
   user: {
@@ -91,11 +93,24 @@ export function AdminOrderDetailView({ order, products }: AdminOrderDetailViewPr
               <p className="text-sm">{order.user.profile.phone}</p>
             )}
           </div>
-          <div>
-            <h3 className="mb-2 text-sm font-medium text-muted-foreground">סטטוס</h3>
-            <Badge variant="secondary" className="text-base">
-              {STATUS_LABELS[order.status] ?? order.status}
-            </Badge>
+          <div className="space-y-3">
+            <div>
+              <h3 className="mb-2 text-sm font-medium text-muted-foreground">סטטוס</h3>
+              <Badge variant="secondary" className="text-base">
+                {STATUS_LABELS[order.status] ?? order.status}
+              </Badge>
+            </div>
+            <div>
+              <h3 className="mb-1 text-sm font-medium text-muted-foreground">נקודת איסוף</h3>
+              {order.pickupLocation ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
+                  <MapPin className="size-3.5" />
+                  {order.pickupLocation}
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground">לא נבחר</span>
+              )}
+            </div>
           </div>
         </div>
 

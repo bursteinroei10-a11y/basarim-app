@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { AdminOrderDeleteButton } from "@/components/admin-order-delete-button";
+import { MapPin } from "lucide-react";
+import { PICKUP_ADDRESS, BALFOUR_ADDRESS } from "@/lib/config";
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "ממתין" },
@@ -17,6 +19,13 @@ const STATUS_OPTIONS = [
   { value: "AWAITING_PAYMENT", label: "ממתין לתשלום" },
   { value: "PAID", label: "שולם" },
   { value: "DELIVERED", label: "נמסר" },
+];
+
+const LOCATION_FILTERS = [
+  { value: "all", label: "כל הנקודות" },
+  { value: PICKUP_ADDRESS, label: PICKUP_ADDRESS },
+  { value: BALFOUR_ADDRESS, label: BALFOUR_ADDRESS },
+  { value: "none", label: "לא נבחר" },
 ];
 
 type OrderRow = {
@@ -27,6 +36,7 @@ type OrderRow = {
   customerEmail: string;
   itemsSummary: string;
   totalAmount: number;
+  pickupLocation?: string | null;
 };
 
 interface AdminOrdersTableProps {
@@ -92,6 +102,7 @@ function OrderStatusCell({
 
 export function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
   const router = useRouter();
+  const [locationFilter, setLocationFilter] = useState("all");
 
   const handleRowClick = (orderId: string) => {
     router.push(`/admin/order-detail?id=${orderId}`);
@@ -101,61 +112,97 @@ export function AdminOrdersTable({ orders }: AdminOrdersTableProps) {
     router.refresh();
   };
 
-  if (orders.length === 0) {
-    return (
-      <div className="rounded-xl border bg-white p-8 text-center text-muted-foreground">
-        אין הזמנות
-      </div>
-    );
-  }
+  const filteredOrders = orders.filter((o) => {
+    if (locationFilter === "all") return true;
+    if (locationFilter === "none") return !o.pickupLocation;
+    return o.pickupLocation === locationFilter;
+  });
 
   return (
-    <div className="rounded-xl border bg-white shadow-sm overflow-x-auto">
-      <table className="w-full text-right text-sm">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="p-3">תאריך</th>
-            <th className="p-3">לקוח</th>
-            <th className="p-3">פריטים</th>
-            <th className="p-3">סטטוס</th>
-            <th className="p-3">סכום</th>
-            <th className="p-3 w-16">מחיקה</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr
-              key={order.id}
-              onClick={() => handleRowClick(order.id)}
-              className="cursor-pointer border-t hover:bg-muted/30 transition-colors"
-            >
-              <td className="p-3">
-                {new Date(order.createdAt).toLocaleDateString("he-IL")}
-              </td>
-              <td className="p-3">
-                <span className="font-medium">{order.customerName}</span>
-                <span className="block text-xs text-muted-foreground">{order.customerEmail}</span>
-              </td>
-              <td className="p-3 max-w-[220px] text-muted-foreground">
-                {order.itemsSummary}
-              </td>
-              <td className="p-3">
-                <OrderStatusCell
-                  orderId={order.id}
-                  currentStatus={order.status}
-                  onUpdated={handleStatusUpdated}
-                />
-              </td>
-              <td className="p-3 font-medium">
-                ₪{order.totalAmount.toLocaleString()}
-              </td>
-              <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                <AdminOrderDeleteButton orderId={order.id} variant="row" />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-4">
+      {/* Location filter */}
+      <div className="flex flex-wrap items-center gap-2">
+        <MapPin className="size-4 text-amber-600" />
+        <span className="text-sm text-muted-foreground">סינון לפי נקודת איסוף:</span>
+        {LOCATION_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setLocationFilter(f.value)}
+            className={`rounded-full px-3 py-1 text-sm transition-colors ${
+              locationFilter === f.value
+                ? "bg-amber-600 text-white"
+                : "bg-muted hover:bg-muted/80 text-stone-600"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <div className="rounded-xl border bg-white p-8 text-center text-muted-foreground">
+          אין הזמנות
+        </div>
+      ) : (
+        <div className="rounded-xl border bg-white shadow-sm overflow-x-auto">
+          <table className="w-full text-right text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="p-3">תאריך</th>
+                <th className="p-3">לקוח</th>
+                <th className="p-3">פריטים</th>
+                <th className="p-3">נקודת איסוף</th>
+                <th className="p-3">סטטוס</th>
+                <th className="p-3">סכום</th>
+                <th className="p-3 w-16">מחיקה</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr
+                  key={order.id}
+                  onClick={() => handleRowClick(order.id)}
+                  className="cursor-pointer border-t hover:bg-muted/30 transition-colors"
+                >
+                  <td className="p-3">
+                    {new Date(order.createdAt).toLocaleDateString("he-IL")}
+                  </td>
+                  <td className="p-3">
+                    <span className="font-medium">{order.customerName}</span>
+                    <span className="block text-xs text-muted-foreground">{order.customerEmail}</span>
+                  </td>
+                  <td className="p-3 max-w-[220px] text-muted-foreground">
+                    {order.itemsSummary}
+                  </td>
+                  <td className="p-3">
+                    {order.pickupLocation ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        <MapPin className="size-3" />
+                        {order.pickupLocation}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <OrderStatusCell
+                      orderId={order.id}
+                      currentStatus={order.status}
+                      onUpdated={handleStatusUpdated}
+                    />
+                  </td>
+                  <td className="p-3 font-medium">
+                    ₪{order.totalAmount.toLocaleString()}
+                  </td>
+                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
+                    <AdminOrderDeleteButton orderId={order.id} variant="row" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

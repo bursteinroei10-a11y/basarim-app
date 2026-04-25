@@ -83,6 +83,7 @@ model Order {
   status            OrderStatus @default(PENDING)
   serviceFee        Int         @default(0) // שירות אריזה משלוח: 12%, min 30 NIS
   totalAmount       Int
+  pickupLocation    String?     // "שלמה המלך 14" | "בלפור 48"
   lockedAt          DateTime?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt

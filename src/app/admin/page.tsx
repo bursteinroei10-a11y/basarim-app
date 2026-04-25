@@ -24,6 +24,7 @@ export default async function AdminOrdersPage() {
       .map((i) => `${i.meatProduct.nameHe} ${i.quantityKg} ק״ג`)
       .join(" • "),
     totalAmount: o.totalAmount,
+    pickupLocation: o.pickupLocation ?? null,
   }));
 
   return (

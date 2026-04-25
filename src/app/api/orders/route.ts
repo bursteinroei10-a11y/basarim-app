@@ -6,10 +6,11 @@ import { calculateOrderTotal } from "@/lib/order-fees";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, items } = body as {
+    const { name, email, phone, pickupLocation, items } = body as {
       name: string;
       email: string;
       phone?: string;
+      pickupLocation?: string;
       items: { productId: string; quantityKg: number; unitPrice: number }[];
     };
 
@@ -86,6 +87,7 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
         serviceFee,
         totalAmount: total,
+        pickupLocation: pickupLocation ?? null,
         items: {
           create: items.map((i) => ({
             meatProductId: i.productId,

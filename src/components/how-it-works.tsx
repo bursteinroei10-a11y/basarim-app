@@ -1,7 +1,7 @@
 import { ShoppingBag, CheckCircle, Clock, Smile, MapPin } from "lucide-react";
 import { WhatsAppIcon } from "@/components/whatsapp-icon";
 import { Button } from "@/components/ui/button";
-import { WHATSAPP_CONTACT_URL, WHATSAPP_GROUP_URL, PICKUP_ADDRESS } from "@/lib/config";
+import { WHATSAPP_CONTACT_URL, WHATSAPP_GROUP_URL, PICKUP_ADDRESS, BALFOUR_ADDRESS, BALFOUR_PHONE, BALFOUR_WHATSAPP_GROUP } from "@/lib/config";
 
 const STEPS = [
   {
@@ -49,23 +49,47 @@ export function HowItWorks() {
           </div>
         ))}
       </div>
-      <div className="mt-8 flex flex-col items-center gap-3 rounded-xl bg-stone-50/80 p-4 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
-        <MapPin className="size-5 shrink-0 text-amber-600" />
-        <p className="text-center text-sm text-stone-600">
-          איסוף: <strong>{PICKUP_ADDRESS}</strong>
-        </p>
-        <a href={WHATSAPP_CONTACT_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" size="sm" className="gap-2 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10">
-            <WhatsAppIcon className="size-4" />
-            צרו קשר בוואטסאפ
-          </Button>
-        </a>
-        <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" size="sm" className="gap-2 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10">
-            <WhatsAppIcon className="size-4" />
-            הצטרפו לקבוצה לעדכוני איסוף
-          </Button>
-        </a>
+      <div className="mt-8 rounded-xl bg-stone-50/80 p-4">
+        <p className="mb-3 text-center text-sm font-medium text-stone-700">נקודות איסוף</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          {/* Location 1 */}
+          <div className="flex flex-col items-center gap-2 rounded-lg bg-white/70 p-4 shadow-sm sm:min-w-[220px]">
+            <div className="flex items-center gap-2">
+              <MapPin className="size-4 shrink-0 text-amber-600" />
+              <p className="text-sm font-semibold text-stone-800">{PICKUP_ADDRESS}</p>
+            </div>
+            <a href={WHATSAPP_GROUP_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" className="gap-2 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10">
+                <WhatsAppIcon className="size-4" />
+                קבוצת עדכוני איסוף
+              </Button>
+            </a>
+          </div>
+          {/* Location 2 */}
+          <div className="flex flex-col items-center gap-2 rounded-lg bg-white/70 p-4 shadow-sm sm:min-w-[220px]">
+            <div className="flex items-center gap-2">
+              <MapPin className="size-4 shrink-0 text-amber-600" />
+              <div className="text-center">
+                <p className="text-sm font-semibold text-stone-800">{BALFOUR_ADDRESS}</p>
+                <p className="text-xs text-stone-500">{BALFOUR_PHONE}</p>
+              </div>
+            </div>
+            <a href={BALFOUR_WHATSAPP_GROUP} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" className="gap-2 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10">
+                <WhatsAppIcon className="size-4" />
+                קבוצת עדכוני איסוף
+              </Button>
+            </a>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <a href={WHATSAPP_CONTACT_URL} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-2 text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10">
+              <WhatsAppIcon className="size-4" />
+              צרו קשר בוואטסאפ
+            </Button>
+          </a>
+        </div>
       </div>
     </section>
   );
