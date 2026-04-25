@@ -107,11 +107,12 @@ export async function POST(req: NextRequest) {
           where: { userId: user!.id },
         });
         const customerName = profile?.name ?? email;
+        const locationNote = order.pickupLocation ? ` | ${order.pickupLocation}` : "";
         await sendAdminPush(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
           {
             title: "הזמנה חדשה",
-            body: `${customerName} — ₪${order.totalAmount.toLocaleString()} (${order.items.length} פריטים)`,
+            body: `${customerName} — ₪${order.totalAmount.toLocaleString()} (${order.items.length} פריטים)${locationNote}`,
             url: "/admin",
           }
         );

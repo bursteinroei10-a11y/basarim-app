@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useCartStore } from "@/store/cart-store";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "ממתין",
@@ -30,6 +31,7 @@ interface Order {
   status: string;
   totalAmount: number;
   createdAt: string;
+  pickupLocation?: string | null;
   items: OrderItem[];
   lastEditedBy?: string;
   lastEditedAt?: string;
@@ -168,6 +170,12 @@ function MyOrdersContent() {
                         <li className="text-stone-500">+{order.items.length - 3} פריטים</li>
                       )}
                     </ul>
+                    {order.pickupLocation && (
+                      <div className="mb-3 flex items-center gap-1.5 text-sm text-stone-600">
+                        <MapPin className="size-3.5 shrink-0 text-amber-600" />
+                        <span>נקודת איסוף: <strong>{order.pickupLocation}</strong></span>
+                      </div>
+                    )}
                     <p className="mb-4 font-bold">₪{order.totalAmount.toLocaleString()}</p>
                     {order.lastEditedAt && (
                       <p className="mb-3 text-xs text-muted-foreground">

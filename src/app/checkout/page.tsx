@@ -73,7 +73,8 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/order-confirmed?id=${data.id}`);
+      const pickupParam = location ? `&pickup=${encodeURIComponent(location)}` : "";
+      router.push(`/order-confirmed?id=${data.id}${pickupParam}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "שגיאה ביצירת ההזמנה");
       setLoading(false);
