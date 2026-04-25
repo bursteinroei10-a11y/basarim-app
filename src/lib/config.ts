@@ -15,7 +15,7 @@ export const PICKUP_ADDRESS = "שלמה המלך 14";
 
 /** Pickup location 2 – Balfour */
 export const BALFOUR_ADDRESS = "בלפור 48";
-export const BALFOUR_PHONE = "+972 50-724-4838";
+export const BALFOUR_WHATSAPP_CONTACT = "https://wa.me/972507244838";
 export const BALFOUR_WHATSAPP_GROUP = "https://chat.whatsapp.com/Lw0kAZvDVjy2L40r42LZYp?mode=gi_t";
 
 /** All pickup locations */

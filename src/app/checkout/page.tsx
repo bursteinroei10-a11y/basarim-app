@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useCartStore } from "@/store/cart-store";
 import { useCutoffStatus } from "@/hooks/use-cutoff-status";
 import { MapPin } from "lucide-react";
-import { PICKUP_ADDRESS, BALFOUR_ADDRESS, BALFOUR_PHONE } from "@/lib/config";
+import { PICKUP_ADDRESS, BALFOUR_ADDRESS } from "@/lib/config";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -220,7 +220,6 @@ export default function CheckoutPage() {
                 <MapPin className="mt-0.5 size-5 shrink-0 text-amber-600" />
                 <div>
                   <p className="font-semibold text-stone-800">{BALFOUR_ADDRESS}</p>
-                  <p className="mt-0.5 text-sm text-stone-500">{BALFOUR_PHONE}</p>
                 </div>
               </div>
             </button>
