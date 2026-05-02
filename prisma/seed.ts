@@ -31,9 +31,10 @@ async function main() {
 
   const BEST_SELLERS: { nameHe: string; order: number }[] = [
     { nameHe: "אנטריקוט", order: 1 },
-    { nameHe: "טחון בקר", order: 2 },
-    { nameHe: "שניצל עגל (שייטל)", order: 3 },
-    { nameHe: "המבורגר 170", order: 4 },
+    { nameHe: "צלעות טלה", order: 2 },
+    { nameHe: "פילה בקר", order: 3 },
+    { nameHe: "טחון בקר", order: 4 },
+    { nameHe: "שניצל עוף דק", order: 5 },
   ];
   const bestSellerSet = new Set(BEST_SELLERS.map((b) => b.nameHe));
   const bestSellerOrderMap = Object.fromEntries(BEST_SELLERS.map((b) => [b.nameHe, b.order]));
@@ -71,7 +72,9 @@ async function main() {
     "פילה עוף נקי": "ChickenImage",
     "שניצל עוף דק": "Schnitzel",
     "רצועות עוף": "ChickenImage",
-    "כנפיים/כרעיים/שוקיים": "ChickenImage",
+    "כנפיים": "ChickenImage",
+    "כרעיים": "ChickenImage",
+    "שוקיים": "ChickenImage",
     "לבבות עוף": "OffalImage",
     "כבד עוף": "OffalImage",
     "טחון עוף": "ChickenImage",
@@ -110,6 +113,12 @@ async function main() {
       existingByKey.set(key, created);
     }
   }
+
+  // Deactivate legacy combined chicken product (replaced by 3 separate ones)
+  await prisma.meatProduct.updateMany({
+    where: { nameHe: "כנפיים/כרעיים/שוקיים" },
+    data: { isActive: false },
+  });
 
   // Seed friend recommendations
   await prisma.friendRecommendation.deleteMany();
