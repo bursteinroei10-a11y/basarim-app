@@ -9,7 +9,8 @@ import { useCutoffStatus } from "@/hooks/use-cutoff-status";
 import { getProductIcon } from "@/lib/product-icons";
 import { Beef } from "lucide-react";
 
-const QTY_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
+const QTY_OPTIONS_DEFAULT = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
+const QTY_OPTIONS_WHOLE = [1, 2, 3, 4, 5];
 
 const IMAGE_ICONS = [
   "Entrecote", "GroundMeatImage", "Schnitzel", "Burger",
@@ -38,6 +39,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const qty = cartItem?.quantityKg ?? 0;
   const [selectedQty, setSelectedQty] = useState<number | null>(null);
   const Icon = getProductIcon(product.iconName);
+  const isGround = product.nameHe.includes("טחון");
+  const QTY_OPTIONS = isGround ? QTY_OPTIONS_WHOLE : QTY_OPTIONS_DEFAULT;
+  const step = isGround ? 1 : 0.5;
 
   const handleAddToCart = () => {
     const amount = selectedQty ?? 1; // default 1 kg if none selected
@@ -95,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 rounded-full hover:bg-white/80 text-xs"
-                  onClick={() => updateQuantity(product.id, qty - 0.5)}
+                  onClick={() => updateQuantity(product.id, qty - step)}
                 >
                   −
                 </Button>
@@ -108,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 rounded-full hover:bg-white/80 text-xs"
-                  onClick={() => updateQuantity(product.id, qty + 0.5)}
+                  onClick={() => updateQuantity(product.id, qty + step)}
                 >
                   +
                 </Button>

@@ -9,7 +9,8 @@ import { getProductIcon } from "@/lib/product-icons";
 import { Beef } from "lucide-react";
 import type { ProductCardProduct } from "@/components/product-card";
 
-const QTY_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3];
+const QTY_OPTIONS_DEFAULT = [0.5, 1, 1.5, 2, 2.5, 3];
+const QTY_OPTIONS_WHOLE = [1, 2, 3, 4, 5];
 
 interface BestSellerCardProps {
   product: ProductCardProduct;
@@ -22,6 +23,9 @@ export function BestSellerCard({ product }: BestSellerCardProps) {
   const qty = cartItem?.quantityKg ?? 0;
   const [selectedQty, setSelectedQty] = useState<number | null>(null);
   const Icon = getProductIcon(product.iconName);
+  const isGround = product.nameHe.includes("טחון");
+  const QTY_OPTIONS = isGround ? QTY_OPTIONS_WHOLE : QTY_OPTIONS_DEFAULT;
+  const step = isGround ? 1 : 0.5;
 
   // Check if it's a local/real photo (not an icon placeholder)
   const hasPhoto = product.imageUrl && (
@@ -93,7 +97,7 @@ export function BestSellerCard({ product }: BestSellerCardProps) {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 rounded-full hover:bg-white/80 text-xs"
-                onClick={() => updateQuantity(product.id, qty - 0.5)}
+                onClick={() => updateQuantity(product.id, qty - step)}
               >
                 −
               </Button>
@@ -106,7 +110,7 @@ export function BestSellerCard({ product }: BestSellerCardProps) {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 rounded-full hover:bg-white/80 text-xs"
-                onClick={() => updateQuantity(product.id, qty + 0.5)}
+                onClick={() => updateQuantity(product.id, qty + step)}
               >
                 +
               </Button>
